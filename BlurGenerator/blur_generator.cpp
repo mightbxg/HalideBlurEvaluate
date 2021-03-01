@@ -29,8 +29,9 @@ public:
         if (get_target().has_gpu_feature()) {
             output.gpu_tile(x, y, xi, yi, tile_x, tile_y);
         } else {
-            output.split(y, y, yi, 8).parallel(y).vectorize(x, 8);
-            blur_x.store_at(blur_y, y).compute_at(blur_y, yi).vectorize(x, 8);
+            const int vec = 8;
+            output.split(y, y, yi, 8).parallel(y).vectorize(x, vec);
+            blur_x.store_at(output, y).compute_at(output, yi).vectorize(x, vec);
         }
     }
 };
