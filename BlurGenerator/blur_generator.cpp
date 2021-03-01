@@ -27,7 +27,11 @@ public:
         // schedule
         Var xo("xo"), yo("yo"), xi("xi"), yi("yi");
         if (get_target().has_gpu_feature()) {
-            output.gpu_tile(x, y, xi, yi, tile_x, tile_y);
+            Var y_inner("y_inner");
+            output.split(y, y, y_inner, tile_y)
+                .reorder(y_inner, x)
+                .unroll(y_inner)
+                .gpu_tile(x, y, xi, yi, tile_x, 1);
         } else {
             const int vec = 8;
             output.split(y, y, yi, 8).parallel(y).vectorize(x, vec);

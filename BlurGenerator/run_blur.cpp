@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
         for (int i = 0; i < iterations; ++i) {
             halide_blur(input, output);
         }
+        output.copy_to_host();
         best_time = min(best_time, elapsed(t1, now()));
     }
     best_time /= iterations;
