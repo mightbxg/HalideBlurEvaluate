@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(BlurEval)
 
+set(Blur_DIR "" CACHE PATH "path to the halide_blur library")
 if(NOT Blur_DIR)
     set(Blur_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/host")
     if(NOT EXISTS "${Blur_DIR}/halide_blur.h")
