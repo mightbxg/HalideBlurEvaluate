@@ -49,7 +49,9 @@ int main(int argc, char* argv[])
 
     // halide
     cv::Mat img_halide(img_src.size(), CV_8UC1);
-    Halide::Runtime::Buffer<uint8_t> input(img_src.data, cols, rows);
+    // the "copy()" is necessary when using GPU
+    Halide::Runtime::Buffer<uint8_t> input
+        = Halide::Runtime::Buffer<uint8_t>(img_src.data, cols, rows).copy();
     Halide::Runtime::Buffer<uint8_t> output(img_halide.data, cols, rows);
     // call it once to initialize the halide runtime stuff
     halide_blur(input, output);
@@ -61,6 +63,7 @@ int main(int argc, char* argv[])
     cout << "time of halide: " << time_halide << " ms" << endl;
 
     // difference
+    cv::imwrite("blur_halide.png", img_halide);
     cv::Mat diff;
     cv::absdiff(img_ocv, img_halide, diff);
     diff = diff - (diff == 1); // wipe out minor difference
