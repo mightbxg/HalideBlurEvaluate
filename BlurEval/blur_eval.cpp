@@ -42,22 +42,21 @@ int main(int argc, char* argv[])
     }
     const int rows = img_src.rows, cols = img_src.cols;
     cv::Mat img_ocv;
-    double time_ocv = benchmark(10, 100, [&] {
+    double time_ocv = benchmark(10, 1000, [&] {
         cv::blur(img_src, img_ocv, cv::Size(3, 3), cv::Point(-1, -1), cv::BORDER_REFLECT);
     });
     cout << "time of ocv   : " << time_ocv << " ms" << endl;
 
     // halide
     cv::Mat img_halide(img_src.size(), CV_8UC1);
-    // the "copy()" is necessary when using GPU
-    Halide::Runtime::Buffer<uint8_t> input
-        = Halide::Runtime::Buffer<uint8_t>(img_src.data, cols, rows).copy();
+    Halide::Runtime::Buffer<uint8_t> input(img_src.data, cols, rows);
+    input.set_host_dirty();
     Halide::Runtime::Buffer<uint8_t> output(img_halide.data, cols, rows);
     // call it once to initialize the halide runtime stuff
     halide_blur(input, output);
     output.copy_to_host();
     double time_halide = benchmark(
-        10, 100,
+        10, 1000,
         [&] { halide_blur(input, output); },
         [&] { output.copy_to_host(); });
     cout << "time of halide: " << time_halide << " ms" << endl;
